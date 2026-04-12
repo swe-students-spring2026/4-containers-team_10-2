@@ -1,0 +1,6 @@
+Flask
+pymongo
+requests
+python-dotenv
+pytest
+pytest-flask
