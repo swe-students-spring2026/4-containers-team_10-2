@@ -1,3 +1,7 @@
+"""Service-layer tests for the web application."""
+
+# pylint: disable=duplicate-code
+
 from unittest.mock import Mock, patch
 
 import pytest
@@ -7,6 +11,7 @@ from app.services import fetch_dashboard_summary, submit_frame_for_analysis
 
 
 def test_submit_frame_for_analysis_success():
+    """Test successful submission of a frame to the ML client."""
     mock_response = Mock()
     mock_response.json.return_value = {
         "status": "ok",
@@ -37,6 +42,7 @@ def test_submit_frame_for_analysis_success():
 
 
 def test_submit_frame_for_analysis_http_error():
+    """Test that HTTP errors from the ML client are raised."""
     mock_response = Mock()
     mock_response.raise_for_status.side_effect = requests.HTTPError("boom")
 
@@ -50,6 +56,7 @@ def test_submit_frame_for_analysis_http_error():
 
 
 def test_fetch_dashboard_summary():
+    """Test dashboard summary aggregation."""
     latest = {
         "_id": "1",
         "emotion": "happy",

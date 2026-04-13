@@ -1,9 +1,14 @@
+"""Route tests for the web application."""
+
+# pylint: disable=duplicate-code
+
 from unittest.mock import patch
 
 import requests
 
 
 def test_index_route(client):
+    """Test that the index route renders successfully."""
     response = client.get("/")
     assert response.status_code == 200
     assert b"MoodMirror" in response.data
@@ -11,12 +16,14 @@ def test_index_route(client):
 
 
 def test_health_route(client):
+    """Test that the health route returns an ok status."""
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json == {"status": "ok"}
 
 
 def test_db_health_route_success(client):
+    """Test that the database health route reports success."""
     with patch("app.routes.ping_db", return_value=True):
         response = client.get("/db-health")
 
@@ -26,6 +33,7 @@ def test_db_health_route_success(client):
 
 
 def test_db_health_route_failure(client):
+    """Test that the database health route reports failure."""
     with patch("app.routes.ping_db", side_effect=RuntimeError("db down")):
         response = client.get("/db-health")
 
@@ -35,12 +43,14 @@ def test_db_health_route_failure(client):
 
 
 def test_analyze_route_missing_image(client):
+    """Test that analyze returns an error when image data is missing."""
     response = client.post("/api/analyze", json={"session_id": "abc"})
     assert response.status_code == 400
     assert response.json["status"] == "error"
 
 
 def test_analyze_route_success(client):
+    """Test that analyze returns a successful ML response."""
     with patch(
         "app.routes.submit_frame_for_analysis",
         return_value={
@@ -71,6 +81,7 @@ def test_analyze_route_success(client):
 
 
 def test_analyze_route_ml_client_request_exception(client):
+    """Test that analyze returns a 502 when the ML client request fails."""
     with patch(
         "app.routes.submit_frame_for_analysis",
         side_effect=requests.RequestException("ml offline"),
@@ -89,6 +100,7 @@ def test_analyze_route_ml_client_request_exception(client):
 
 
 def test_analyze_route_unexpected_exception(client):
+    """Test that analyze returns a 500 on unexpected exceptions."""
     with patch(
         "app.routes.submit_frame_for_analysis",
         side_effect=RuntimeError("unexpected"),
@@ -107,6 +119,7 @@ def test_analyze_route_unexpected_exception(client):
 
 
 def test_api_history_route(client):
+    """Test that the history API returns recent records."""
     fake_records = [
         {"_id": "1", "emotion": "happy"},
         {"_id": "2", "emotion": "sad"},
@@ -121,6 +134,7 @@ def test_api_history_route(client):
 
 
 def test_api_latest_route(client):
+    """Test that the latest API returns the latest record."""
     latest = {"_id": "1", "emotion": "neutral"}
 
     with patch("app.routes.get_latest_prediction", return_value=latest):
