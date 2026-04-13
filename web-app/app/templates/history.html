@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}History | MoodMirror{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Prediction History</h1>
+  <p class="subtitle">
+    Recent records stored by the machine-learning client in MongoDB.
+  </p>
+</section>
+
+<section class="panel">
+  {% if recent %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Session ID</th>
+            <th>Emotion</th>
+            <th>Confidence</th>
+            <th>Face Detected</th>
+            <th>Border Color</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in recent %}
+            <tr>
+              <td>{{ item.timestamp }}</td>
+              <td>{{ item.session_id }}</td>
+              <td>{{ item.emotion }}</td>
+              <td>{{ "%.2f"|format(item.confidence) }}</td>
+              <td>{{ item.face_detected }}</td>
+              <td>{{ item.border_color }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>No records found yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

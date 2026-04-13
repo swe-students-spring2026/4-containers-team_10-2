@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Live Camera | MoodMirror{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Live Emotion Camera</h1>
+  <p class="subtitle">
+    Start your webcam and the border will respond to the detected emotion.
+  </p>
+</section>
+
+<section class="live-layout">
+  <div class="video-panel">
+    <div class="video-shell neutral" id="video-shell">
+      <video id="video" autoplay playsinline muted></video>
+    </div>
+    <canvas id="canvas" class="hidden"></canvas>
+
+    <div class="controls">
+      <button id="start-btn" class="button-primary">Start Camera</button>
+      <button id="stop-btn" class="button-secondary">Stop Camera</button>
+    </div>
+  </div>
+
+  <aside class="status-card">
+    <h2>Current Result</h2>
+    <div class="status-row">
+      <span class="status-label">Emotion</span>
+      <span id="emotion-label" class="status-value">Not started</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Confidence</span>
+      <span id="confidence-label" class="status-value">--</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Face Detected</span>
+      <span id="face-label" class="status-value">--</span>
+    </div>
+
+    <div class="legend">
+      <h3>Border Legend</h3>
+      <div class="legend-item">
+        <span class="legend-color happy"></span>
+        <span>Happy</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color sad"></span>
+        <span>Sad</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color neutral"></span>
+        <span>Neutral</span>
+      </div>
+    </div>
+  </aside>
+</section>
+
+<script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
+{% endblock %}

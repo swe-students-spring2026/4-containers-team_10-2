@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}MoodMirror{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="{{ url_for('main.index') }}">MoodMirror</a>
+        <nav class="nav-links">
+          <a href="{{ url_for('main.index') }}">Live Camera</a>
+          <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('main.history') }}">History</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page-container">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

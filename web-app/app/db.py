@@ -1,6 +1,7 @@
 """Database access helpers for the web application."""
 
 from pymongo import MongoClient
+
 from app.config import Config
 
 
@@ -16,26 +17,57 @@ def get_collection():
 
 
 def ping_db():
-    """Check if the database connection is alive."""
+    """Check whether the database connection is alive."""
     client = get_client()
     client.admin.command("ping")
     return True
 
 
+def _serialize_record(record):
+    """Convert MongoDB record fields to template/API-friendly values."""
+    if not record:
+        return None
+
+    record["_id"] = str(record["_id"])
+    return record
+
+
 def get_recent_predictions(limit=20):
-    """Fetch recent prediction records."""
+    """Fetch the most recent prediction records."""
     collection = get_collection()
-    return list(collection.find().sort("timestamp", -1).limit(limit))
+    records = list(collection.find().sort("timestamp", -1).limit(limit))
+    return [_serialize_record(record) for record in records]
 
 
 def get_latest_prediction():
-    """Fetch the most recent prediction."""
+    """Fetch the latest prediction record."""
     collection = get_collection()
-    return collection.find_one(sort=[("timestamp", -1)])
+    record = collection.find_one(sort=[("timestamp", -1)])
+    return _serialize_record(record)
 
 
 def get_emotion_counts():
-    """Aggregate counts of each emotion."""
+    """Aggregate counts by emotion."""
     collection = get_collection()
-    pipeline = [{"$group": {"_id": "$emotion", "count": {"$sum": 1}}}]
-    return list(collection.aggregate(pipeline))
+    pipeline = [
+        {
+            "$group": {
+                "_id": "$emotion",
+                "count": {"$sum": 1},
+            }
+        }
+    ]
+    results = list(collection.aggregate(pipeline))
+
+    counts = {
+        "happy": 0,
+        "sad": 0,
+        "neutral": 0,
+    }
+
+    for item in results:
+        emotion = item["_id"]
+        if emotion in counts:
+            counts[emotion] = item["count"]
+
+    return counts

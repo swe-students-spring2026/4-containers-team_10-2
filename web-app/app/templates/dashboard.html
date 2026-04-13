@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | MoodMirror{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Emotion Dashboard</h1>
+  <p class="subtitle">
+    View recent machine-learning predictions and summary statistics.
+  </p>
+</section>
+
+<section class="stats-grid">
+  <div class="stat-card">
+    <h2>Total Predictions</h2>
+    <p class="stat-number">{{ total_predictions }}</p>
+  </div>
+
+  <div class="stat-card">
+    <h2>Happy</h2>
+    <p class="stat-number">{{ counts.happy }}</p>
+  </div>
+
+  <div class="stat-card">
+    <h2>Sad</h2>
+    <p class="stat-number">{{ counts.sad }}</p>
+  </div>
+
+  <div class="stat-card">
+    <h2>Neutral</h2>
+    <p class="stat-number">{{ counts.neutral }}</p>
+  </div>
+</section>
+
+<section class="dashboard-grid">
+  <div class="panel">
+    <h2>Latest Prediction</h2>
+    {% if latest %}
+      <div class="latest-result">
+        <p><strong>Emotion:</strong> {{ latest.emotion }}</p>
+        <p><strong>Confidence:</strong> {{ "%.2f"|format(latest.confidence) }}</p>
+        <p><strong>Face Detected:</strong> {{ latest.face_detected }}</p>
+        <p><strong>Timestamp:</strong> {{ latest.timestamp }}</p>
+      </div>
+    {% else %}
+      <p>No predictions available yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <h2>Recent Predictions</h2>
+    {% if recent %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Emotion</th>
+              <th>Confidence</th>
+              <th>Face</th>
+            </tr>
+          </thead>
+          <tbody id="recent-table-body">
+            {% for item in recent %}
+              <tr>
+                <td>{{ item.timestamp }}</td>
+                <td>{{ item.emotion }}</td>
+                <td>{{ "%.2f"|format(item.confidence) }}</td>
+                <td>{{ item.face_detected }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No recent predictions available.</p>
+    {% endif %}
+  </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
