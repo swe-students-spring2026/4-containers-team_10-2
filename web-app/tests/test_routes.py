@@ -1,5 +1,7 @@
 """Route tests for the web application."""
 
+# pylint: disable=duplicate-code
+
 from unittest.mock import patch
 
 import requests

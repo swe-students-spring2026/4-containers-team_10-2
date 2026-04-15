@@ -1,5 +1,7 @@
 """Dashboard and history page tests for the web application."""
 
+# pylint: disable=duplicate-code
+
 from unittest.mock import patch
 
 
