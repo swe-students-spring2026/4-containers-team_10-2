@@ -1,5 +1,7 @@
 """Flask server for emotion detection API."""
 
+import os
+
 from flask import Flask, jsonify, request
 
 from app.config import Config
@@ -33,9 +35,18 @@ def analyze():
     session_id = data.get("session_id", "default-session")
     image_b64 = data.get("image_b64")
 
-    result = detect_emotion(image_b64)
-    document = build_prediction_document(session_id, result)
-    inserted_id = insert_prediction(document)
+    if not image_b64:
+        return (
+            jsonify({"status": "error", "message": "image_b64 is required"}),
+            400,
+        )
+
+    try:
+        result = detect_emotion(image_b64)
+        document = build_prediction_document(session_id, result)
+        inserted_id = insert_prediction(document)
+    except RuntimeError as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 500
 
     return (
         jsonify(
@@ -53,4 +64,5 @@ def analyze():
 
 
 if __name__ == "__main__":
-    app.run(host=Config.ML_CLIENT_HOST, port=Config.ML_CLIENT_PORT, debug=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "0") == "1"
+    app.run(host=Config.ML_CLIENT_HOST, port=Config.ML_CLIENT_PORT, debug=debug_mode)
