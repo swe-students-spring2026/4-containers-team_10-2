@@ -27,12 +27,14 @@ def test_submit_frame_for_analysis_success():
             "http://localhost:5001",
             "fake-image-data",
             "session-123",
+            "user-123",
         )
 
     mock_post.assert_called_once_with(
         "http://localhost:5001/analyze",
         json={
             "session_id": "session-123",
+            "user_id": "user-123",
             "image_b64": "fake-image-data",
         },
         timeout=15,
@@ -52,11 +54,12 @@ def test_submit_frame_for_analysis_http_error():
                 "http://localhost:5001",
                 "fake-image-data",
                 "session-123",
+                "user-123",
             )
 
 
 def test_fetch_dashboard_summary():
-    """Test dashboard summary aggregation."""
+    """Test dashboard summary aggregation for a specific user."""
     latest = {
         "_id": "1",
         "emotion": "happy",
@@ -74,10 +77,18 @@ def test_fetch_dashboard_summary():
         {"_id": "2", "emotion": "neutral"},
     ]
 
-    with patch("app.services.get_latest_prediction", return_value=latest), patch(
+    with patch(
+        "app.services.get_latest_prediction", return_value=latest
+    ) as mock_latest, patch(
         "app.services.get_emotion_counts", return_value=counts
-    ), patch("app.services.get_recent_predictions", return_value=recent):
-        summary = fetch_dashboard_summary()
+    ) as mock_counts, patch(
+        "app.services.get_recent_predictions", return_value=recent
+    ) as mock_recent:
+        summary = fetch_dashboard_summary("user-123")
+
+    mock_latest.assert_called_once_with(user_id="user-123")
+    mock_counts.assert_called_once_with(user_id="user-123")
+    mock_recent.assert_called_once_with(user_id="user-123", limit=10)
 
     assert summary["latest"] == latest
     assert summary["counts"] == counts

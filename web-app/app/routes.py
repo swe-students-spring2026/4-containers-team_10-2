@@ -4,6 +4,7 @@ import uuid
 
 import requests
 from flask import Blueprint, current_app, jsonify, render_template, request
+from flask_login import current_user, login_required
 
 from app.db import get_latest_prediction, get_recent_predictions, ping_db
 from app.services import fetch_dashboard_summary, submit_frame_for_analysis
@@ -12,15 +13,17 @@ main = Blueprint("main", __name__)
 
 
 @main.route("/", methods=["GET"])
+@login_required
 def index():
     """Render the webcam interface."""
     return render_template("index.html")
 
 
 @main.route("/dashboard", methods=["GET"])
+@login_required
 def dashboard():
     """Render the dashboard page."""
-    summary = fetch_dashboard_summary()
+    summary = fetch_dashboard_summary(current_user.id)
     return render_template(
         "dashboard.html",
         latest=summary["latest"],
@@ -31,9 +34,10 @@ def dashboard():
 
 
 @main.route("/history", methods=["GET"])
+@login_required
 def history():
     """Render the history page."""
-    recent = get_recent_predictions(limit=50)
+    recent = get_recent_predictions(user_id=current_user.id, limit=50)
     return render_template("history.html", recent=recent)
 
 
@@ -54,6 +58,7 @@ def db_health():
 
 
 @main.route("/api/analyze", methods=["POST"])
+@login_required
 def analyze():
     """Receive a browser frame and forward it to the ML client."""
     data = request.get_json(silent=True) or {}
@@ -69,6 +74,7 @@ def analyze():
             current_app.config["ML_CLIENT_URL"],
             image_b64,
             session_id,
+            current_user.id,
         )
         return jsonify(result), 200
     except requests.RequestException as exc:
@@ -86,15 +92,17 @@ def analyze():
 
 
 @main.route("/api/history", methods=["GET"])
+@login_required
 def api_history():
     """Return recent prediction history as JSON."""
     limit = request.args.get("limit", default=20, type=int)
-    recent = get_recent_predictions(limit=limit)
+    recent = get_recent_predictions(user_id=current_user.id, limit=limit)
     return jsonify({"status": "ok", "records": recent}), 200
 
 
 @main.route("/api/latest", methods=["GET"])
+@login_required
 def api_latest():
     """Return the latest prediction as JSON."""
-    latest = get_latest_prediction()
+    latest = get_latest_prediction(user_id=current_user.id)
     return jsonify({"status": "ok", "latest": latest}), 200

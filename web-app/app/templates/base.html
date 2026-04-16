@@ -9,16 +9,36 @@
   <body>
     <header class="site-header">
       <div class="site-header-inner">
-        <a class="brand" href="{{ url_for('main.index') }}">MoodMirror</a>
+        <a class="brand" href="{% if current_user.is_authenticated %}{{ url_for('main.index') }}{% else %}{{ url_for('auth.login') }}{% endif %}">
+          MoodMirror
+        </a>
+
         <nav class="nav-links">
-          <a href="{{ url_for('main.index') }}">Live Camera</a>
-          <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-          <a href="{{ url_for('main.history') }}">History</a>
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.index') }}">Live Camera</a>
+            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('main.history') }}">History</a>
+            <span class="nav-user">Hi, {{ current_user.username }}</span>
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+          {% endif %}
         </nav>
       </div>
     </header>
 
     <main class="page-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <section class="flash-stack">
+            {% for category, message in messages %}
+              <div class="flash-message flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </section>
+        {% endif %}
+      {% endwith %}
+
       {% block content %}{% endblock %}
     </main>
   </body>
