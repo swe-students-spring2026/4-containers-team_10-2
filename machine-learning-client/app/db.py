@@ -7,6 +7,7 @@ from app.config import Config
 
 _client = None  # pylint: disable=invalid-name
 
+
 def get_client():
     """Get MongoDB client instance (cached singleton)."""
     global _client  # pylint: disable=global-statement

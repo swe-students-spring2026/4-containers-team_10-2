@@ -90,9 +90,7 @@ def test_insert_prediction_returns_string_id(mock_mongo_client):
     from app.db import insert_prediction  # pylint: disable=import-outside-toplevel
 
     fake_client = MagicMock()
-    fake_collection = (
-        fake_client.__getitem__.return_value.__getitem__.return_value
-    )
+    fake_collection = fake_client.__getitem__.return_value.__getitem__.return_value
     fake_collection.insert_one.return_value.inserted_id = "abc123"
     mock_mongo_client.return_value = fake_client
 
@@ -108,9 +106,7 @@ def test_insert_prediction_wraps_pymongo_error(mock_mongo_client):
     from app.db import insert_prediction  # pylint: disable=import-outside-toplevel
 
     fake_client = MagicMock()
-    fake_collection = (
-        fake_client.__getitem__.return_value.__getitem__.return_value
-    )
+    fake_collection = fake_client.__getitem__.return_value.__getitem__.return_value
     fake_collection.insert_one.side_effect = PyMongoError("write error")
     mock_mongo_client.return_value = fake_client
 
