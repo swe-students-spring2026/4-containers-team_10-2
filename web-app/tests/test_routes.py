@@ -18,8 +18,8 @@ def test_index_route_logged_in(logged_in_client):
     """Test that the index route renders for authenticated users."""
     response = logged_in_client.get("/")
     assert response.status_code == 200
-    assert b"MoodMirror" in response.data
-    assert b"Live Emotion Camera" in response.data
+    assert b"StyleSense" in response.data
+    assert b"Live Face Shape Scanner" in response.data
 
 
 def test_dashboard_route_requires_login(client):
@@ -34,26 +34,30 @@ def test_dashboard_route_logged_in(logged_in_client, test_user):
     summary = {
         "latest": {
             "_id": "1",
-            "emotion": "happy",
-            "confidence": 0.91,
-            "timestamp": "2026-04-13T20:00:00Z",
             "face_detected": True,
+            "face_shape": "Oval",
+            "confidence": 0.91,
+            "recommended_hairstyles": [
+                "Textured quiff",
+                "Classic side part",
+                "Layered medium cut",
+            ],
+            "timestamp": "2026-04-13T20:00:00Z",
         },
         "counts": {
-            "happy": 4,
-            "sad": 1,
-            "neutral": 2,
+            "Oval": 4,
+            "Round": 1,
         },
         "recent": [
             {
                 "_id": "1",
                 "timestamp": "2026-04-13T20:00:00Z",
-                "emotion": "happy",
+                "face_shape": "Oval",
                 "confidence": 0.91,
                 "face_detected": True,
             }
         ],
-        "total_predictions": 7,
+        "total_scans": 5,
     }
 
     with patch(
@@ -62,7 +66,7 @@ def test_dashboard_route_logged_in(logged_in_client, test_user):
         response = logged_in_client.get("/dashboard")
 
     assert response.status_code == 200
-    assert b"Emotion Dashboard" in response.data
+    assert b"Hairstyle Recommendation Dashboard" in response.data
     mock_summary.assert_called_once_with(test_user.id)
 
 
@@ -74,10 +78,14 @@ def test_history_route_logged_in(logged_in_client, test_user):
             "timestamp": "2026-04-13T20:00:00Z",
             "session_id": "abc",
             "user_id": test_user.id,
-            "emotion": "happy",
-            "confidence": 0.95,
             "face_detected": True,
-            "border_color": "yellow",
+            "face_shape": "Oval",
+            "confidence": 0.95,
+            "recommended_hairstyles": [
+                "Textured quiff",
+                "Classic side part",
+                "Layered medium cut",
+            ],
         }
     ]
 
@@ -87,7 +95,7 @@ def test_history_route_logged_in(logged_in_client, test_user):
         response = logged_in_client.get("/history")
 
     assert response.status_code == 200
-    assert b"Prediction History" in response.data
+    assert b"Scan History" in response.data
     mock_recent.assert_called_once_with(user_id=test_user.id, limit=50)
 
 
@@ -138,11 +146,14 @@ def test_analyze_route_success(logged_in_client, test_user):
         "app.routes.submit_frame_for_analysis",
         return_value={
             "status": "ok",
-            "emotion": "happy",
-            "confidence": 0.95,
-            "border_color": "yellow",
             "face_detected": True,
-            "inserted_id": "123",
+            "face_shape": "Oval",
+            "confidence": 0.95,
+            "recommended_hairstyles": [
+                "Textured quiff",
+                "Classic side part",
+                "Layered medium cut",
+            ],
         },
     ) as mock_submit:
         response = logged_in_client.post(
@@ -155,7 +166,7 @@ def test_analyze_route_success(logged_in_client, test_user):
 
     assert response.status_code == 200
     assert response.json["status"] == "ok"
-    assert response.json["emotion"] == "happy"
+    assert response.json["face_shape"] == "Oval"
     mock_submit.assert_called_once_with(
         "http://localhost:5001",
         "fake-image-data",
@@ -212,8 +223,8 @@ def test_api_history_route_requires_login(client):
 def test_api_history_route(logged_in_client, test_user):
     """Test that the history API returns only the current user's records."""
     fake_records = [
-        {"_id": "1", "emotion": "happy"},
-        {"_id": "2", "emotion": "sad"},
+        {"_id": "1", "face_shape": "Oval"},
+        {"_id": "2", "face_shape": "Round"},
     ]
 
     with patch(
@@ -236,7 +247,7 @@ def test_api_latest_route_requires_login(client):
 
 def test_api_latest_route(logged_in_client, test_user):
     """Test that the latest API returns the current user's latest record."""
-    latest = {"_id": "1", "emotion": "neutral"}
+    latest = {"_id": "1", "face_shape": "Oval"}
 
     with patch("app.routes.get_latest_prediction", return_value=latest) as mock_latest:
         response = logged_in_client.get("/api/latest")

@@ -1,9 +1,9 @@
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
-const videoShell = document.getElementById("video-shell");
-const emotionLabel = document.getElementById("emotion-label");
-const confidenceLabel = document.getElementById("confidence-label");
 const faceLabel = document.getElementById("face-label");
+const faceShapeLabel = document.getElementById("face-shape-label");
+const confidenceLabel = document.getElementById("confidence-label");
+const hairstyleList = document.getElementById("hairstyle-list");
 const startBtn = document.getElementById("start-btn");
 const stopBtn = document.getElementById("stop-btn");
 
@@ -19,16 +19,15 @@ async function startCamera() {
     });
 
     video.srcObject = mediaStream;
-    emotionLabel.textContent = "Camera running";
-    confidenceLabel.textContent = "--";
     faceLabel.textContent = "--";
+    faceShapeLabel.textContent = "Scanning...";
+    confidenceLabel.textContent = "--";
 
     if (!analysisInterval) {
-      analysisInterval = setInterval(captureAndAnalyzeFrame, 1000);
+      analysisInterval = setInterval(captureAndAnalyzeFrame, 1500);
     }
   } catch (error) {
-    emotionLabel.textContent = "Camera access failed";
-    faceLabel.textContent = "No";
+    faceShapeLabel.textContent = "Camera access failed";
     console.error(error);
   }
 }
@@ -45,20 +44,30 @@ function stopCamera() {
   }
 
   video.srcObject = null;
-  emotionLabel.textContent = "Stopped";
-  confidenceLabel.textContent = "--";
   faceLabel.textContent = "--";
-  videoShell.className = "video-shell neutral";
+  faceShapeLabel.textContent = "Stopped";
+  confidenceLabel.textContent = "--";
+  hairstyleList.innerHTML = "<li>No recommendations yet.</li>";
+}
+
+function updateRecommendationList(recommendations) {
+  if (!recommendations || recommendations.length === 0) {
+    hairstyleList.innerHTML = "<li>No recommendations available.</li>";
+    return;
+  }
+
+  hairstyleList.innerHTML = recommendations
+    .map((style) => `<li>${style}</li>`)
+    .join("");
 }
 
 function updateUiFromResult(result) {
-  emotionLabel.textContent = result.emotion || "unknown";
+  faceLabel.textContent = result.face_detected ? "Yes" : "No";
+  faceShapeLabel.textContent = result.face_shape || "Unknown";
   confidenceLabel.textContent =
     typeof result.confidence === "number" ? result.confidence.toFixed(2) : "--";
-  faceLabel.textContent = result.face_detected ? "Yes" : "No";
 
-  const emotion = result.emotion || "neutral";
-  videoShell.className = `video-shell ${emotion}`;
+  updateRecommendationList(result.recommended_hairstyles);
 }
 
 async function captureAndAnalyzeFrame() {

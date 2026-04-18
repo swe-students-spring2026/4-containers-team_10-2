@@ -1,5 +1,7 @@
 """User model helpers for Flask-Login."""
 
+# pylint: disable=too-few-public-methods
+
 from flask_login import UserMixin
 
 

@@ -10,55 +10,55 @@ def test_dashboard_route_renders_summary(logged_in_client):
     summary = {
         "latest": {
             "_id": "1",
-            "emotion": "happy",
-            "confidence": 0.91,
-            "timestamp": "2026-04-13T20:00:00Z",
             "face_detected": True,
+            "face_shape": "Oval",
+            "confidence": 0.91,
+            "recommended_hairstyles": [
+                "Textured quiff",
+                "Classic side part",
+                "Layered medium cut",
+            ],
+            "timestamp": "2026-04-13T20:00:00Z",
         },
         "counts": {
-            "happy": 4,
-            "sad": 1,
-            "neutral": 2,
+            "Oval": 4,
+            "Round": 1,
         },
         "recent": [
             {
                 "_id": "1",
                 "timestamp": "2026-04-13T20:00:00Z",
-                "emotion": "happy",
+                "face_shape": "Oval",
                 "confidence": 0.91,
                 "face_detected": True,
             }
         ],
-        "total_predictions": 7,
+        "total_scans": 5,
     }
 
     with patch("app.routes.fetch_dashboard_summary", return_value=summary):
         response = logged_in_client.get("/dashboard")
 
     assert response.status_code == 200
-    assert b"Emotion Dashboard" in response.data
-    assert b"Total Predictions" in response.data
-    assert b"Happy" in response.data
+    assert b"Hairstyle Recommendation Dashboard" in response.data
+    assert b"Total Scans" in response.data
+    assert b"Oval" in response.data
 
 
 def test_dashboard_route_with_no_latest(logged_in_client):
     """Test that the dashboard handles empty summary data."""
     summary = {
         "latest": None,
-        "counts": {
-            "happy": 0,
-            "sad": 0,
-            "neutral": 0,
-        },
+        "counts": {},
         "recent": [],
-        "total_predictions": 0,
+        "total_scans": 0,
     }
 
     with patch("app.routes.fetch_dashboard_summary", return_value=summary):
         response = logged_in_client.get("/dashboard")
 
     assert response.status_code == 200
-    assert b"No predictions available yet." in response.data
+    assert b"No scans available yet." in response.data
 
 
 def test_history_route_renders_records(logged_in_client):
@@ -69,20 +69,28 @@ def test_history_route_renders_records(logged_in_client):
             "timestamp": "2026-04-13T20:00:00Z",
             "session_id": "abc",
             "user_id": "507f1f77bcf86cd799439011",
-            "emotion": "happy",
-            "confidence": 0.95,
             "face_detected": True,
-            "border_color": "yellow",
+            "face_shape": "Oval",
+            "confidence": 0.95,
+            "recommended_hairstyles": [
+                "Textured quiff",
+                "Classic side part",
+                "Layered medium cut",
+            ],
         },
         {
             "_id": "2",
             "timestamp": "2026-04-13T20:01:00Z",
             "session_id": "abc",
             "user_id": "507f1f77bcf86cd799439011",
-            "emotion": "sad",
-            "confidence": 0.52,
             "face_detected": True,
-            "border_color": "blue",
+            "face_shape": "Round",
+            "confidence": 0.52,
+            "recommended_hairstyles": [
+                "Pompadour",
+                "Angular fringe",
+                "High fade with volume",
+            ],
         },
     ]
 
@@ -90,9 +98,9 @@ def test_history_route_renders_records(logged_in_client):
         response = logged_in_client.get("/history")
 
     assert response.status_code == 200
-    assert b"Prediction History" in response.data
-    assert b"yellow" in response.data
-    assert b"blue" in response.data
+    assert b"Scan History" in response.data
+    assert b"Textured quiff" in response.data
+    assert b"Pompadour" in response.data
 
 
 def test_history_route_with_no_records(logged_in_client):
@@ -101,4 +109,4 @@ def test_history_route_with_no_records(logged_in_client):
         response = logged_in_client.get("/history")
 
     assert response.status_code == 200
-    assert b"No records found yet." in response.data
+    assert b"No scans found yet." in response.data

@@ -12,7 +12,7 @@ def get_client():
 
 
 def get_collection():
-    """Return the MongoDB collection for emotion predictions."""
+    """Return the MongoDB collection for face-shape predictions."""
     client = get_client()
     db = client[Config.MONGO_DB_NAME]
     return db[Config.MONGO_COLLECTION]
@@ -33,7 +33,7 @@ def ping_db():
 
 
 def _serialize_record(record):
-    """Convert MongoDB record fields to template/API-friendly values."""
+    """Convert MongoDB fields into template/API-friendly values."""
     if not record:
         return None
 
@@ -73,7 +73,7 @@ def find_user_by_id(user_id):
 
 
 def get_recent_predictions(user_id, limit=20):
-    """Fetch the most recent prediction records for a user."""
+    """Fetch recent face-shape prediction records for a user."""
     collection = get_collection()
     records = list(
         collection.find({"user_id": user_id}).sort("timestamp", -1).limit(limit)
@@ -88,29 +88,30 @@ def get_latest_prediction(user_id):
     return _serialize_record(record)
 
 
-def get_emotion_counts(user_id):
-    """Aggregate counts by emotion for a user."""
+def get_face_shape_counts(user_id):
+    """Aggregate counts by detected face shape for a user."""
     collection = get_collection()
     pipeline = [
         {"$match": {"user_id": user_id}},
         {
             "$group": {
-                "_id": "$emotion",
+                "_id": "$face_shape",
                 "count": {"$sum": 1},
             }
         },
     ]
     results = list(collection.aggregate(pipeline))
 
-    counts = {
-        "happy": 0,
-        "sad": 0,
-        "neutral": 0,
-    }
+    counts = {}
 
     for item in results:
-        emotion = item["_id"]
-        if emotion in counts:
-            counts[emotion] = item["count"]
+        shape = item["_id"] or "Unknown"
+        counts[shape] = item["count"]
 
     return counts
+
+
+def get_total_scans(user_id):
+    """Return total number of scans for a user."""
+    collection = get_collection()
+    return collection.count_documents({"user_id": user_id})

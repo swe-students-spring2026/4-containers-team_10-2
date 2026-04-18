@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}History | MoodMirror{% endblock %}
+{% block title %}History | StyleSense{% endblock %}
 
 {% block content %}
 <section class="hero">
-  <h1>Prediction History</h1>
+  <h1>Scan History</h1>
   <p class="subtitle">
-    Recent records stored by the machine-learning client in MongoDB.
+    Browse your previous face-shape analyses and hairstyle recommendations.
   </p>
 </section>
 
@@ -18,10 +18,10 @@
           <tr>
             <th>Timestamp</th>
             <th>Session ID</th>
-            <th>Emotion</th>
-            <th>Confidence</th>
             <th>Face Detected</th>
-            <th>Border Color</th>
+            <th>Face Shape</th>
+            <th>Confidence</th>
+            <th>Recommendations</th>
           </tr>
         </thead>
         <tbody>
@@ -29,17 +29,23 @@
             <tr>
               <td>{{ item.timestamp }}</td>
               <td>{{ item.session_id }}</td>
-              <td>{{ item.emotion }}</td>
-              <td>{{ "%.2f"|format(item.confidence) }}</td>
               <td>{{ item.face_detected }}</td>
-              <td>{{ item.border_color }}</td>
+              <td>{{ item.face_shape }}</td>
+              <td>{{ "%.2f"|format(item.confidence) }}</td>
+              <td>
+                <ul class="history-recommendation-list">
+                  {% for style in item.recommended_hairstyles %}
+                    <li>{{ style }}</li>
+                  {% endfor %}
+                </ul>
+              </td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% else %}
-    <p>No records found yet.</p>
+    <p>No scans found yet.</p>
   {% endif %}
 </section>
 {% endblock %}

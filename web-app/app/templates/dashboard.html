@@ -1,81 +1,123 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard | MoodMirror{% endblock %}
+{% block title %}Dashboard | StyleSense{% endblock %}
 
 {% block content %}
 <section class="hero">
-  <h1>Emotion Dashboard</h1>
+  <h1>Hairstyle Recommendation Dashboard</h1>
   <p class="subtitle">
-    View recent machine-learning predictions and summary statistics.
+    Review your latest scan, face shape history, and recommendation activity.
   </p>
 </section>
 
-<section class="stats-grid">
+<section class="stats-grid stats-grid-three">
   <div class="stat-card">
-    <h2>Total Predictions</h2>
-    <p class="stat-number">{{ total_predictions }}</p>
+    <h2>Total Scans</h2>
+    <p class="stat-number">{{ total_scans }}</p>
   </div>
 
   <div class="stat-card">
-    <h2>Happy</h2>
-    <p class="stat-number">{{ counts.happy }}</p>
+    <h2>Latest Face Shape</h2>
+    <p class="stat-number stat-number-small">
+      {% if latest %}
+        {{ latest.face_shape }}
+      {% else %}
+        --
+      {% endif %}
+    </p>
   </div>
 
   <div class="stat-card">
-    <h2>Sad</h2>
-    <p class="stat-number">{{ counts.sad }}</p>
-  </div>
-
-  <div class="stat-card">
-    <h2>Neutral</h2>
-    <p class="stat-number">{{ counts.neutral }}</p>
+    <h2>Latest Confidence</h2>
+    <p class="stat-number stat-number-small">
+      {% if latest %}
+        {{ "%.2f"|format(latest.confidence) }}
+      {% else %}
+        --
+      {% endif %}
+    </p>
   </div>
 </section>
 
 <section class="dashboard-grid">
   <div class="panel">
-    <h2>Latest Prediction</h2>
+    <h2>Latest Recommendation</h2>
     {% if latest %}
       <div class="latest-result">
-        <p><strong>Emotion:</strong> {{ latest.emotion }}</p>
-        <p><strong>Confidence:</strong> {{ "%.2f"|format(latest.confidence) }}</p>
         <p><strong>Face Detected:</strong> {{ latest.face_detected }}</p>
+        <p><strong>Face Shape:</strong> {{ latest.face_shape }}</p>
+        <p><strong>Confidence:</strong> {{ "%.2f"|format(latest.confidence) }}</p>
         <p><strong>Timestamp:</strong> {{ latest.timestamp }}</p>
+
+        <div class="recommendations-block">
+          <h3>Top Hairstyles</h3>
+          <ul class="recommendation-list">
+            {% for style in latest.recommended_hairstyles %}
+              <li>{{ style }}</li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
     {% else %}
-      <p>No predictions available yet.</p>
+      <p>No scans available yet.</p>
     {% endif %}
   </div>
 
   <div class="panel">
-    <h2>Recent Predictions</h2>
-    {% if recent %}
+    <h2>Face Shape Counts</h2>
+    {% if counts %}
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Timestamp</th>
-              <th>Emotion</th>
-              <th>Confidence</th>
-              <th>Face</th>
+              <th>Face Shape</th>
+              <th>Count</th>
             </tr>
           </thead>
-          <tbody id="recent-table-body">
-            {% for item in recent %}
+          <tbody>
+            {% for shape, count in counts.items() %}
               <tr>
-                <td>{{ item.timestamp }}</td>
-                <td>{{ item.emotion }}</td>
-                <td>{{ "%.2f"|format(item.confidence) }}</td>
-                <td>{{ item.face_detected }}</td>
+                <td>{{ shape }}</td>
+                <td>{{ count }}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     {% else %}
-      <p>No recent predictions available.</p>
+      <p>No face shape data available yet.</p>
     {% endif %}
   </div>
+</section>
+
+<section class="panel panel-top-space">
+  <h2>Recent Scans</h2>
+  {% if recent %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Face Shape</th>
+            <th>Confidence</th>
+            <th>Detected</th>
+          </tr>
+        </thead>
+        <tbody id="recent-table-body">
+          {% for item in recent %}
+            <tr>
+              <td>{{ item.timestamp }}</td>
+              <td>{{ item.face_shape }}</td>
+              <td>{{ "%.2f"|format(item.confidence) }}</td>
+              <td>{{ item.face_detected }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>No recent scans available.</p>
+  {% endif %}
 </section>
 
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

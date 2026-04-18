@@ -1,30 +1,34 @@
-"""Database module for MongoDB operations."""
+"""Database helpers for the machine-learning client."""
 
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
 from app.config import Config
 
-_client = None  # pylint: disable=invalid-name
+_CLIENT = None
+_CLIENT_SOURCE = None
 
 
 def get_client():
-    """Get MongoDB client instance (cached singleton)."""
-    global _client  # pylint: disable=global-statement
-    if _client is None:
-        _client = MongoClient(Config.MONGO_URI)
-    return _client
+    """Create and cache a MongoDB client."""
+    global _CLIENT, _CLIENT_SOURCE  # pylint: disable=global-statement
+
+    if _CLIENT is None or _CLIENT_SOURCE is not MongoClient:
+        _CLIENT = MongoClient(Config.MONGO_URI)
+        _CLIENT_SOURCE = MongoClient
+
+    return _CLIENT
 
 
 def get_collection():
-    """Get MongoDB collection for predictions."""
+    """Return the MongoDB collection for face-shape predictions."""
     client = get_client()
-    database = client[Config.MONGO_DB_NAME]
-    return database[Config.MONGO_COLLECTION]
+    db = client[Config.MONGO_DB_NAME]
+    return db[Config.MONGO_COLLECTION]
 
 
 def ping_db():
-    """Ping the database to verify connection."""
+    """Check that the database connection is alive."""
     try:
         client = get_client()
         client.admin.command("ping")
@@ -40,4 +44,4 @@ def insert_prediction(document):
         result = collection.insert_one(document)
         return str(result.inserted_id)
     except PyMongoError as exc:
-        raise RuntimeError("Failed to insert prediction into MongoDB") from exc
+        raise RuntimeError("Failed to insert prediction") from exc

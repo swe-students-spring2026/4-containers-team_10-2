@@ -6,7 +6,11 @@ import requests
 from flask import Blueprint, current_app, jsonify, render_template, request
 from flask_login import current_user, login_required
 
-from app.db import get_latest_prediction, get_recent_predictions, ping_db
+from app.db import (
+    get_latest_prediction,
+    get_recent_predictions,
+    ping_db,
+)
 from app.services import fetch_dashboard_summary, submit_frame_for_analysis
 
 main = Blueprint("main", __name__)
@@ -15,7 +19,7 @@ main = Blueprint("main", __name__)
 @main.route("/", methods=["GET"])
 @login_required
 def index():
-    """Render the webcam interface."""
+    """Render the live hairstyle recommendation interface."""
     return render_template("index.html")
 
 
@@ -29,7 +33,7 @@ def dashboard():
         latest=summary["latest"],
         counts=summary["counts"],
         recent=summary["recent"],
-        total_predictions=summary["total_predictions"],
+        total_scans=summary["total_scans"],
     )
 
 

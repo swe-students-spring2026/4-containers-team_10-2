@@ -34,43 +34,71 @@ def test_db_health_failure(mock_ping, client):
 
 
 @patch("app.server.insert_prediction")
-@patch("app.server.detect_emotion")
-def test_analyze_with_payload(mock_detect, mock_insert, client):
-    """POST /analyze returns prediction fields and stores the document."""
+@patch("app.server.detect_face_shape")
+@patch("app.server.decode_base64_image")
+def test_analyze_with_payload(mock_decode, mock_detect, mock_insert, client):
+    """POST /analyze returns face-shape fields and stores the document."""
+    mock_decode.return_value = "decoded-image"
     mock_detect.return_value = {
         "face_detected": True,
-        "raw_emotion": "happy",
-        "emotion": "happy",
+        "face_shape": "Oval",
         "confidence": 0.95,
-        "scores": {"happy": 0.95, "neutral": 0.04, "sad": 0.01},
-        "border_color": "yellow",
+        "recommended_hairstyles": [
+            "Textured quiff",
+            "Classic side part",
+            "Layered medium cut",
+        ],
     }
     mock_insert.return_value = "fake_mongo_id_123"
 
     response = client.post(
         "/analyze",
-        json={"session_id": "sess-1", "image_b64": "abc=="},
+        json={
+            "session_id": "sess-1",
+            "user_id": "user-123",
+            "image_b64": "abc==",
+        },
     )
 
     assert response.status_code == 200
     body = response.get_json()
     assert body["status"] == "ok"
     assert body["inserted_id"] == "fake_mongo_id_123"
-    assert body["emotion"] == "happy"
+    assert body["face_shape"] == "Oval"
     assert body["confidence"] == 0.95
-    assert body["border_color"] == "yellow"
     assert body["face_detected"] is True
-    mock_detect.assert_called_once_with("abc==")
+    assert body["recommended_hairstyles"] == [
+        "Textured quiff",
+        "Classic side part",
+        "Layered medium cut",
+    ]
+    mock_decode.assert_called_once_with("abc==")
+    mock_detect.assert_called_once_with("decoded-image")
     mock_insert.assert_called_once()
 
 
 def test_analyze_missing_image_returns_400(client):
     """POST /analyze without image_b64 returns 400."""
-    response = client.post("/analyze", json={"session_id": "sess-1"})
+    response = client.post(
+        "/analyze",
+        json={"session_id": "sess-1", "user_id": "user-123"},
+    )
     assert response.status_code == 400
     body = response.get_json()
     assert body["status"] == "error"
     assert "image_b64" in body["message"]
+
+
+def test_analyze_missing_user_id_returns_400(client):
+    """POST /analyze without user_id returns 400."""
+    response = client.post(
+        "/analyze",
+        json={"session_id": "sess-1", "image_b64": "abc=="},
+    )
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["status"] == "error"
+    assert "user_id" in body["message"]
 
 
 def test_analyze_empty_body_returns_400(client):
@@ -91,41 +119,62 @@ def test_analyze_invalid_json_returns_400(client):
 
 
 @patch("app.server.insert_prediction")
-@patch("app.server.detect_emotion")
-def test_analyze_default_session_id(mock_detect, mock_insert, client):
+@patch("app.server.detect_face_shape")
+@patch("app.server.decode_base64_image")
+def test_analyze_default_session_id(mock_decode, mock_detect, mock_insert, client):
     """POST /analyze uses 'default-session' when session_id not provided."""
+    mock_decode.return_value = "decoded-image"
     mock_detect.return_value = {
         "face_detected": True,
-        "raw_emotion": "happy",
-        "emotion": "happy",
+        "face_shape": "Oval",
         "confidence": 0.95,
-        "scores": {"happy": 0.95, "neutral": 0.04, "sad": 0.01},
-        "border_color": "yellow",
+        "recommended_hairstyles": [
+            "Textured quiff",
+            "Classic side part",
+            "Layered medium cut",
+        ],
     }
     mock_insert.return_value = "id_xyz"
 
-    response = client.post("/analyze", json={"image_b64": "xyz=="})
+    response = client.post(
+        "/analyze",
+        json={
+            "user_id": "user-123",
+            "image_b64": "xyz==",
+        },
+    )
 
     assert response.status_code == 200
     inserted_doc = mock_insert.call_args[0][0]
     assert inserted_doc["session_id"] == "default-session"
+    assert inserted_doc["user_id"] == "user-123"
 
 
 @patch("app.server.insert_prediction")
-@patch("app.server.detect_emotion")
-def test_analyze_handles_db_error(mock_detect, mock_insert, client):
+@patch("app.server.detect_face_shape")
+@patch("app.server.decode_base64_image")
+def test_analyze_handles_db_error(mock_decode, mock_detect, mock_insert, client):
     """POST /analyze returns 500 when insert_prediction raises RuntimeError."""
+    mock_decode.return_value = "decoded-image"
     mock_detect.return_value = {
         "face_detected": True,
-        "raw_emotion": "happy",
-        "emotion": "happy",
+        "face_shape": "Oval",
         "confidence": 0.95,
-        "scores": {"happy": 0.95, "neutral": 0.04, "sad": 0.01},
-        "border_color": "yellow",
+        "recommended_hairstyles": [
+            "Textured quiff",
+            "Classic side part",
+            "Layered medium cut",
+        ],
     }
     mock_insert.side_effect = RuntimeError("mongo down")
 
-    response = client.post("/analyze", json={"image_b64": "abc=="})
+    response = client.post(
+        "/analyze",
+        json={
+            "user_id": "user-123",
+            "image_b64": "abc==",
+        },
+    )
 
     assert response.status_code == 500
     body = response.get_json()

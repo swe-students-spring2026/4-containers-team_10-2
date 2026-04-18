@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Live Camera | MoodMirror{% endblock %}
+{% block title %}Live Scan | StyleSense{% endblock %}
 
 {% block content %}
 <section class="hero">
-  <h1>Live Emotion Camera</h1>
+  <h1>Live Face Shape Scanner</h1>
   <p class="subtitle">
-    Start your webcam and the border will respond to the detected emotion.
+    Scan your face and get hairstyle recommendations based on detected face shape.
   </p>
 </section>
 
 <section class="live-layout">
   <div class="video-panel">
-    <div class="video-shell neutral" id="video-shell">
+    <div class="video-shell" id="video-shell">
       <video id="video" autoplay playsinline muted></video>
     </div>
     <canvas id="canvas" class="hidden"></canvas>
@@ -25,33 +25,27 @@
 
   <aside class="status-card">
     <h2>Current Result</h2>
-    <div class="status-row">
-      <span class="status-label">Emotion</span>
-      <span id="emotion-label" class="status-value">Not started</span>
-    </div>
-    <div class="status-row">
-      <span class="status-label">Confidence</span>
-      <span id="confidence-label" class="status-value">--</span>
-    </div>
+
     <div class="status-row">
       <span class="status-label">Face Detected</span>
       <span id="face-label" class="status-value">--</span>
     </div>
 
-    <div class="legend">
-      <h3>Border Legend</h3>
-      <div class="legend-item">
-        <span class="legend-color happy"></span>
-        <span>Happy</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color sad"></span>
-        <span>Sad</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color neutral"></span>
-        <span>Neutral</span>
-      </div>
+    <div class="status-row">
+      <span class="status-label">Face Shape</span>
+      <span id="face-shape-label" class="status-value">Not started</span>
+    </div>
+
+    <div class="status-row">
+      <span class="status-label">Confidence</span>
+      <span id="confidence-label" class="status-value">--</span>
+    </div>
+
+    <div class="recommendations-block">
+      <h3>Recommended Hairstyles</h3>
+      <ul id="hairstyle-list" class="recommendation-list">
+        <li>No recommendations yet.</li>
+      </ul>
     </div>
   </aside>
 </section>

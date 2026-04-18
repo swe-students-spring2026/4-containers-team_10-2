@@ -10,9 +10,10 @@ from app.db import (
     find_user_by_username,
     get_client,
     get_collection,
-    get_emotion_counts,
+    get_face_shape_counts,
     get_latest_prediction,
     get_recent_predictions,
+    get_total_scans,
     get_users_collection,
     ping_db,
 )
@@ -71,12 +72,12 @@ def test_serialize_record_none():
 
 def test_serialize_record_converts_id_and_user_id_to_string():
     """Test that record identifiers are converted to strings."""
-    record = {"_id": 123, "user_id": 456, "emotion": "happy"}
+    record = {"_id": 123, "user_id": 456, "face_shape": "Oval"}
     result = _serialize_record(record)
 
     assert result["_id"] == "123"
     assert result["user_id"] == "456"
-    assert result["emotion"] == "happy"
+    assert result["face_shape"] == "Oval"
 
 
 def test_create_user():
@@ -139,8 +140,8 @@ def test_get_recent_predictions():
     """Test fetching recent prediction records for a user."""
     mock_cursor = MagicMock()
     mock_cursor.limit.return_value = [
-        {"_id": 1, "user_id": 10, "emotion": "happy"},
-        {"_id": 2, "user_id": 10, "emotion": "sad"},
+        {"_id": 1, "user_id": 10, "face_shape": "Oval"},
+        {"_id": 2, "user_id": 10, "face_shape": "Round"},
     ]
 
     mock_collection = MagicMock()
@@ -163,14 +164,14 @@ def test_get_latest_prediction_with_record():
     mock_collection.find_one.return_value = {
         "_id": 7,
         "user_id": 10,
-        "emotion": "neutral",
+        "face_shape": "Oval",
     }
 
     with patch("app.db.get_collection", return_value=mock_collection):
         result = get_latest_prediction(user_id="10")
 
     assert result["_id"] == "7"
-    assert result["emotion"] == "neutral"
+    assert result["face_shape"] == "Oval"
     mock_collection.find_one.assert_called_once_with(
         {"user_id": "10"},
         sort=[("timestamp", -1)],
@@ -188,38 +189,45 @@ def test_get_latest_prediction_without_record():
     assert result is None
 
 
-def test_get_emotion_counts_with_results():
-    """Test aggregation of known emotion counts for a user."""
+def test_get_face_shape_counts_with_results():
+    """Test aggregation of known face-shape counts for a user."""
     mock_collection = MagicMock()
     mock_collection.aggregate.return_value = [
-        {"_id": "happy", "count": 4},
-        {"_id": "sad", "count": 2},
-        {"_id": "neutral", "count": 3},
+        {"_id": "Oval", "count": 4},
+        {"_id": "Round", "count": 2},
     ]
 
     with patch("app.db.get_collection", return_value=mock_collection):
-        result = get_emotion_counts(user_id="10")
+        result = get_face_shape_counts(user_id="10")
 
     assert result == {
-        "happy": 4,
-        "sad": 2,
-        "neutral": 3,
+        "Oval": 4,
+        "Round": 2,
     }
 
 
-def test_get_emotion_counts_ignores_unknown_emotions():
-    """Test that unknown emotions are ignored in aggregation."""
+def test_get_face_shape_counts_with_unknown_shape():
+    """Test that missing shapes are labeled as Unknown."""
     mock_collection = MagicMock()
     mock_collection.aggregate.return_value = [
-        {"_id": "happy", "count": 1},
-        {"_id": "angry", "count": 9},
+        {"_id": None, "count": 1},
     ]
 
     with patch("app.db.get_collection", return_value=mock_collection):
-        result = get_emotion_counts(user_id="10")
+        result = get_face_shape_counts(user_id="10")
 
     assert result == {
-        "happy": 1,
-        "sad": 0,
-        "neutral": 0,
+        "Unknown": 1,
     }
+
+
+def test_get_total_scans():
+    """Test total scan count retrieval."""
+    mock_collection = MagicMock()
+    mock_collection.count_documents.return_value = 5
+
+    with patch("app.db.get_collection", return_value=mock_collection):
+        result = get_total_scans(user_id="10")
+
+    assert result == 5
+    mock_collection.count_documents.assert_called_once_with({"user_id": "10"})

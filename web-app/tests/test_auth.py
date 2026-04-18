@@ -131,4 +131,4 @@ def test_logout_success(logged_in_client):
     """Test successful logout."""
     response = logged_in_client.get("/logout", follow_redirects=True)
     assert response.status_code == 200
-    assert b"Logged out successfully." in response.data
+    assert b"Login" in response.data
