@@ -256,4 +256,3 @@ def test_api_latest_route(logged_in_client, test_user):
     assert response.json["status"] == "ok"
     assert response.json["latest"] == latest
     mock_latest.assert_called_once_with(user_id=test_user.id)
-    

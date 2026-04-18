@@ -85,7 +85,9 @@ def test_fetch_dashboard_summary():
         {"_id": "2", "face_shape": "Round"},
     ]
 
-    with patch("app.services.get_latest_prediction", return_value=latest) as mock_latest, patch(
+    with patch(
+        "app.services.get_latest_prediction", return_value=latest
+    ) as mock_latest, patch(
         "app.services.get_face_shape_counts", return_value=counts
     ) as mock_counts, patch(
         "app.services.get_recent_predictions", return_value=recent
@@ -103,4 +105,3 @@ def test_fetch_dashboard_summary():
     assert summary["counts"] == counts
     assert summary["recent"] == recent
     assert summary["total_scans"] == 4
-    

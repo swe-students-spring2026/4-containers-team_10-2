@@ -231,4 +231,3 @@ def test_get_total_scans():
 
     assert result == 5
     mock_collection.count_documents.assert_called_once_with({"user_id": "10"})
-    

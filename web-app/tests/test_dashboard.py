@@ -110,4 +110,3 @@ def test_history_route_with_no_records(logged_in_client):
 
     assert response.status_code == 200
     assert b"No scans found yet." in response.data
-    
