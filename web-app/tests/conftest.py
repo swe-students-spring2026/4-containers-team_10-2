@@ -1,51 +1,53 @@
-import pytest
-import sys
-import os
+"""Pytest fixtures for the web app."""
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# pylint: disable=redefined-outer-name
+
+from unittest.mock import patch
+
+import pytest
 
 from app.app import create_app
-
-
-class FakeUser:
-    id = "507f1f77bcf86cd799439011"
-    is_authenticated = False   # 🔥 ADD THIS
+from app.models import User
 
 
 @pytest.fixture
 def app():
-    app = create_app()
-    app.config["TESTING"] = True
-    app.config["LOGIN_DISABLED"] = True
-    return app
+    """Create a test app."""
+    flask_app = create_app()
+    flask_app.config.update(
+        TESTING=True,
+        SECRET_KEY="test-secret-key",
+        ML_CLIENT_URL="http://localhost:5001",
+        LOGIN_DISABLED=False,
+        WTF_CSRF_ENABLED=False,
+    )
+    return flask_app
 
 
 @pytest.fixture
-def client(app, monkeypatch):
-    # fake logged-in user
-    monkeypatch.setattr("flask_login.utils._get_user", lambda: FakeUser())
-
-    # MOCK ALL DB FUNCTIONS HERE
-    monkeypatch.setattr("app.routes.get_recent_predictions", lambda *args, **kwargs: [])
-    monkeypatch.setattr("app.routes.get_latest_prediction", lambda *args, **kwargs: {})
-    monkeypatch.setattr("app.routes.get_user_preferences", lambda *args, **kwargs: {})
-    monkeypatch.setattr("app.routes.get_favorite_styles", lambda *args, **kwargs: [])
-    monkeypatch.setattr("app.routes.update_user_preferences", lambda *args, **kwargs: None)
-    monkeypatch.setattr("app.routes.add_favorite_style", lambda *args, **kwargs: None)
-    monkeypatch.setattr("app.routes.remove_favorite_style", lambda *args, **kwargs: None)
-    monkeypatch.setattr("app.routes.ping_db", lambda: True)
-
-    monkeypatch.setattr(
-        "app.routes.submit_frame_for_analysis",
-        lambda *args, **kwargs: {"recommended_hairstyles": []},
-    )
-    monkeypatch.setattr(
-        "app.routes.apply_preferences_to_recommendations",
-        lambda *args, **kwargs: [],
-    )
-    monkeypatch.setattr(
-        "app.routes.annotate_favorites",
-        lambda *args, **kwargs: [],
-    )
-
+def client(app):
+    """Create a test client."""
     return app.test_client()
+
+
+@pytest.fixture
+def test_user():
+    """Create a reusable user."""
+    return User("507f1f77bcf86cd799439011", "testuser", "test@example.com")
+
+
+@pytest.fixture
+def logged_in_client(app, client, test_user):  # pylint: disable=unused-argument
+    """Create an authenticated test client."""
+    with patch(
+        "app.app.find_user_by_id",
+        return_value={
+            "_id": test_user.id,
+            "username": test_user.username,
+            "email": test_user.email,
+        },
+    ):
+        with client.session_transaction() as session:
+            session["_user_id"] = test_user.id
+            session["_fresh"] = True
+        yield client
