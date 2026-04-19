@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: stylesense-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  ml-client:
+    build:
+      context: ./machine-learning-client
+    container_name: stylesense-ml-client
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/
+      MONGO_DB_NAME: stylesense
+      MONGO_COLLECTION: face_shape_predictions
+      ML_CLIENT_HOST: 0.0.0.0
+      ML_CLIENT_PORT: 5001
+    ports:
+      - "5001:5001"
+
+  web-app:
+    build:
+      context: ./web-app
+    container_name: stylesense-web-app
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - ml-client
+    environment:
+      SECRET_KEY: dev-secret-key
+      ML_CLIENT_URL: http://ml-client:5001
+      MONGO_URI: mongodb://mongodb:27017/
+      MONGO_DB_NAME: stylesense
+      MONGO_COLLECTION: face_shape_predictions
+      USERS_COLLECTION: users
+    ports:
+      - "5000:5000"
+
+volumes:
+  mongo_data:
