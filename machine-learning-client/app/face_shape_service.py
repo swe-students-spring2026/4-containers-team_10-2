@@ -1,6 +1,6 @@
 """Face-shape analysis service."""
 
-# pylint: disable=no-member
+# pylint: disable=no-member,too-many-locals,too-many-return-statements
 
 from collections import Counter, defaultdict, deque
 from math import atan2, degrees, hypot
