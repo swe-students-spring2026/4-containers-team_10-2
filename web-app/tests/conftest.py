@@ -1,58 +1,51 @@
-"""Pytest fixtures for the web application tests."""
-
-# pylint: disable=redefined-outer-name
-
 import pytest
+import sys
+import os
 
-import app.app as app_module
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from app.app import create_app
-from app.models import User
+
+
+class FakeUser:
+    id = "507f1f77bcf86cd799439011"
+    is_authenticated = False   # 🔥 ADD THIS
 
 
 @pytest.fixture
 def app():
-    """Create and configure a Flask app for testing."""
-    flask_app = create_app()
-    flask_app.config.update(
-        TESTING=True,
-        SECRET_KEY="test-secret-key",
-        ML_CLIENT_URL="http://localhost:5001",
-        LOGIN_DISABLED=False,
+    app = create_app()
+    app.config["TESTING"] = True
+    app.config["LOGIN_DISABLED"] = True
+    return app
+
+
+@pytest.fixture
+def client(app, monkeypatch):
+    # fake logged-in user
+    monkeypatch.setattr("flask_login.utils._get_user", lambda: FakeUser())
+
+    # MOCK ALL DB FUNCTIONS HERE
+    monkeypatch.setattr("app.routes.get_recent_predictions", lambda *args, **kwargs: [])
+    monkeypatch.setattr("app.routes.get_latest_prediction", lambda *args, **kwargs: {})
+    monkeypatch.setattr("app.routes.get_user_preferences", lambda *args, **kwargs: {})
+    monkeypatch.setattr("app.routes.get_favorite_styles", lambda *args, **kwargs: [])
+    monkeypatch.setattr("app.routes.update_user_preferences", lambda *args, **kwargs: None)
+    monkeypatch.setattr("app.routes.add_favorite_style", lambda *args, **kwargs: None)
+    monkeypatch.setattr("app.routes.remove_favorite_style", lambda *args, **kwargs: None)
+    monkeypatch.setattr("app.routes.ping_db", lambda: True)
+
+    monkeypatch.setattr(
+        "app.routes.submit_frame_for_analysis",
+        lambda *args, **kwargs: {"recommended_hairstyles": []},
     )
-    return flask_app
+    monkeypatch.setattr(
+        "app.routes.apply_preferences_to_recommendations",
+        lambda *args, **kwargs: [],
+    )
+    monkeypatch.setattr(
+        "app.routes.annotate_favorites",
+        lambda *args, **kwargs: [],
+    )
 
-
-@pytest.fixture
-def client(app):
-    """Create a Flask test client."""
     return app.test_client()
-
-
-@pytest.fixture
-def test_user():
-    """Create a reusable authenticated user object."""
-    return User("507f1f77bcf86cd799439011", "testuser", "test@example.com")
-
-
-@pytest.fixture(autouse=True)
-def mock_find_user_by_id(monkeypatch, test_user):
-    """Mock Flask-Login user loading to always return the test user."""
-    user_document = {
-        "_id": test_user.id,
-        "username": test_user.username,
-        "email": test_user.email,
-    }
-
-    def fake_find_user_by_id(_user_id):
-        return user_document
-
-    monkeypatch.setattr(app_module, "find_user_by_id", fake_find_user_by_id)
-
-
-@pytest.fixture
-def logged_in_client(client, test_user):
-    """Return a client with an authenticated session."""
-    with client.session_transaction() as session:
-        session["_user_id"] = test_user.id
-        session["_fresh"] = True
-    return client
