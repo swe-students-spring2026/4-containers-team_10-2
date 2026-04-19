@@ -7,7 +7,7 @@ from unittest.mock import patch
 import numpy as np
 
 from app.face_shape_service import (
-    _classify_from_aspect_ratio,
+    _classify,
     _estimate_confidence,
     detect_face_shape,
 )
@@ -15,27 +15,27 @@ from app.face_shape_service import (
 
 def test_classify_from_aspect_ratio_oval():
     """Test oval face classification."""
-    assert _classify_from_aspect_ratio(1.35) == "Oval"
+    assert _classify(1.35) == "Oval"
 
 
 def test_classify_from_aspect_ratio_round():
     """Test round face classification."""
-    assert _classify_from_aspect_ratio(0.8) == "Round"
+    assert _classify(0.8) == "Round"
 
 
 def test_classify_from_aspect_ratio_square():
     """Test square face classification."""
-    assert _classify_from_aspect_ratio(1.2) == "Square"
+    assert _classify(1.2) == "Square"
 
 
 def test_classify_from_aspect_ratio_diamond():
     """Test diamond face classification."""
-    assert _classify_from_aspect_ratio(1.0) == "Diamond"
+    assert _classify(1.0) == "Diamond"
 
 
 def test_classify_from_aspect_ratio_unknown():
     """Test unknown face classification fallback."""
-    assert _classify_from_aspect_ratio(0.9) == "Unknown"
+    assert _classify(0.9) == "Unknown"
 
 
 def test_estimate_confidence_unknown_shape():
