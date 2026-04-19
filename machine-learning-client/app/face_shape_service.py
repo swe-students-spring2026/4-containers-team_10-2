@@ -10,7 +10,6 @@ import mediapipe as mp
 
 from app.label_mapper import get_hairstyle_recommendations, normalize_face_shape
 
-
 mp_face_mesh = mp.solutions.face_mesh
 _face_mesh = mp_face_mesh.FaceMesh(
     static_image_mode=False,
@@ -142,7 +141,11 @@ def _classify(features):
         return "Triangle"
 
     # Diamond: prominent cheekbones wider than both forehead and jaw
-    if cheek_to_forehead > 1.09 and cheek_to_jaw > 1.09 and 1.18 <= length_to_cheek <= 1.50:
+    if (
+        cheek_to_forehead > 1.09
+        and cheek_to_jaw > 1.09
+        and 1.18 <= length_to_cheek <= 1.50
+    ):
         return "Diamond"
 
     # Oblong: long face with balanced widths
