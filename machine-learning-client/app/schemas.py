@@ -1,5 +1,7 @@
 """Schema helpers for MongoDB documents."""
 
+# pylint: disable=duplicate-code
+
 from datetime import datetime, timezone
 
 
@@ -14,4 +16,5 @@ def build_prediction_document(user_id, session_id, result):
         "face_shape": result["face_shape"],
         "confidence": result["confidence"],
         "recommended_hairstyles": result["recommended_hairstyles"],
+        "face_box": result.get("face_box"),
     }

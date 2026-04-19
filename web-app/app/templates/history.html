@@ -6,46 +6,90 @@
 <section class="hero">
   <h1>Scan History</h1>
   <p class="subtitle">
-    Browse your previous face-shape analyses and hairstyle recommendations.
+    Browse past scans and save styles you want to revisit.
   </p>
 </section>
 
 <section class="panel">
   {% if recent %}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Session ID</th>
-            <th>Face Detected</th>
-            <th>Face Shape</th>
-            <th>Confidence</th>
-            <th>Recommendations</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in recent %}
-            <tr>
-              <td>{{ item.timestamp }}</td>
-              <td>{{ item.session_id }}</td>
-              <td>{{ item.face_detected }}</td>
-              <td>{{ item.face_shape }}</td>
-              <td>{{ "%.2f"|format(item.confidence) }}</td>
-              <td>
-                <ul class="history-recommendation-list">
-                  {% for style in item.recommended_hairstyles %}
-                    <li>{{ style }}</li>
-                  {% endfor %}
-                </ul>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="history-stack">
+      {% for item in recent %}
+        <div class="history-card">
+          <div class="history-card-header">
+            <div>
+              <h2>{{ item.face_shape }}</h2>
+              <p class="history-meta">
+                {{ item.timestamp }} · Confidence {{ "%.2f"|format(item.confidence) }}
+              </p>
+            </div>
+          </div>
+
+          <div class="history-recommendations-grid">
+            <div>
+              <h3>Conventionally Male Hairstyles</h3>
+              <div class="style-card-list">
+                {% for style in item.recommended_hairstyles.male %}
+                  <div class="style-card">
+                    <div class="style-card-top">
+                      <strong>{{ style.name }}</strong>
+                      <button
+                        class="favorite-btn {% if style.favorited %}favorite-active{% endif %}"
+                        data-name="{{ style.name }}"
+                        data-category="male"
+                        data-face-shape="{{ item.face_shape }}"
+                        data-barber-notes="{{ style.barber_notes }}"
+                        data-favorited="{{ 'true' if style.favorited else 'false' }}"
+                      >
+                        {% if style.favorited %}★ Saved{% else %}☆ Save{% endif %}
+                      </button>
+                    </div>
+                    <p class="style-meta">
+                      Length: {{ style.lengths|join(", ") }} ·
+                      Texture: {{ style.textures|join(", ") }} ·
+                      Maintenance: {{ style.maintenance }}
+                    </p>
+                    <p class="style-notes">{{ style.barber_notes }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <h3>Conventionally Female Hairstyles</h3>
+              <div class="style-card-list">
+                {% for style in item.recommended_hairstyles.female %}
+                  <div class="style-card">
+                    <div class="style-card-top">
+                      <strong>{{ style.name }}</strong>
+                      <button
+                        class="favorite-btn {% if style.favorited %}favorite-active{% endif %}"
+                        data-name="{{ style.name }}"
+                        data-category="female"
+                        data-face-shape="{{ item.face_shape }}"
+                        data-barber-notes="{{ style.barber_notes }}"
+                        data-favorited="{{ 'true' if style.favorited else 'false' }}"
+                      >
+                        {% if style.favorited %}★ Saved{% else %}☆ Save{% endif %}
+                      </button>
+                    </div>
+                    <p class="style-meta">
+                      Length: {{ style.lengths|join(", ") }} ·
+                      Texture: {{ style.textures|join(", ") }} ·
+                      Maintenance: {{ style.maintenance }}
+                    </p>
+                    <p class="style-notes">{{ style.barber_notes }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
   {% else %}
     <p>No scans found yet.</p>
   {% endif %}
 </section>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

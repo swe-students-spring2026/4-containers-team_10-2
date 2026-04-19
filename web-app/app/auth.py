@@ -1,4 +1,4 @@
-"""Authentication routes for the web application."""
+"""Authentication routes."""
 
 from datetime import datetime, timezone
 
@@ -14,7 +14,7 @@ auth = Blueprint("auth", __name__)
 
 @auth.route("/signup", methods=["GET", "POST"])
 def signup():
-    """Render and handle the sign-up page."""
+    """Handle signup."""
     if current_user.is_authenticated:
         return redirect(url_for("main.dashboard"))
 
@@ -42,6 +42,12 @@ def signup():
             "email": email,
             "password_hash": password_hash,
             "created_at": datetime.now(timezone.utc).isoformat(),
+            "preferences": {
+                "hair_length": "any",
+                "hair_texture": "any",
+                "maintenance_level": "any",
+            },
+            "favorite_styles": [],
         }
 
         inserted_id = create_user(user_document)
@@ -56,7 +62,7 @@ def signup():
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    """Render and handle the login page."""
+    """Handle login."""
     if current_user.is_authenticated:
         return redirect(url_for("main.dashboard"))
 
@@ -84,7 +90,7 @@ def login():
 @auth.route("/logout")
 @login_required
 def logout():
-    """Log the user out."""
+    """Handle logout."""
     logout_user()
     flash("Logged out successfully.", "success")
     return redirect(url_for("auth.login"))

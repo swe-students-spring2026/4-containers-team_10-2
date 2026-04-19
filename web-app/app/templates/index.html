@@ -6,7 +6,7 @@
 <section class="hero">
   <h1>Live Face Shape Scanner</h1>
   <p class="subtitle">
-    Scan your face and get hairstyle recommendations based on detected face shape.
+    Scan your face, save preferences, and shortlist styles you want to keep.
   </p>
 </section>
 
@@ -20,6 +20,39 @@
     <div class="controls">
       <button id="start-btn" class="button-primary">Start Camera</button>
       <button id="stop-btn" class="button-secondary">Stop Camera</button>
+    </div>
+
+    <div class="panel panel-top-space">
+      <h2>Your Style Preferences</h2>
+      <form id="preferences-form" class="preferences-form">
+        <label for="hair-length">Hair Length</label>
+        <select id="hair-length" name="hair_length">
+          <option value="any" {% if preferences.hair_length == "any" %}selected{% endif %}>Any</option>
+          <option value="short" {% if preferences.hair_length == "short" %}selected{% endif %}>Short</option>
+          <option value="medium" {% if preferences.hair_length == "medium" %}selected{% endif %}>Medium</option>
+          <option value="long" {% if preferences.hair_length == "long" %}selected{% endif %}>Long</option>
+        </select>
+
+        <label for="hair-texture">Hair Texture</label>
+        <select id="hair-texture" name="hair_texture">
+          <option value="any" {% if preferences.hair_texture == "any" %}selected{% endif %}>Any</option>
+          <option value="straight" {% if preferences.hair_texture == "straight" %}selected{% endif %}>Straight</option>
+          <option value="wavy" {% if preferences.hair_texture == "wavy" %}selected{% endif %}>Wavy</option>
+          <option value="curly" {% if preferences.hair_texture == "curly" %}selected{% endif %}>Curly</option>
+          <option value="coily" {% if preferences.hair_texture == "coily" %}selected{% endif %}>Coily</option>
+        </select>
+
+        <label for="maintenance-level">Maintenance</label>
+        <select id="maintenance-level" name="maintenance_level">
+          <option value="any" {% if preferences.maintenance_level == "any" %}selected{% endif %}>Any</option>
+          <option value="low" {% if preferences.maintenance_level == "low" %}selected{% endif %}>Low</option>
+          <option value="medium" {% if preferences.maintenance_level == "medium" %}selected{% endif %}>Medium</option>
+          <option value="high" {% if preferences.maintenance_level == "high" %}selected{% endif %}>High</option>
+        </select>
+
+        <button type="submit" class="button-primary">Save Preferences</button>
+        <p id="preferences-status" class="small-status"></p>
+      </form>
     </div>
   </div>
 
@@ -42,10 +75,17 @@
     </div>
 
     <div class="recommendations-block">
-      <h3>Recommended Hairstyles</h3>
-      <ul id="hairstyle-list" class="recommendation-list">
-        <li>No recommendations yet.</li>
-      </ul>
+      <h3>Conventionally Male Hairstyles</h3>
+      <div id="male-hairstyle-list" class="style-card-list">
+        <p class="muted-copy">No recommendations yet.</p>
+      </div>
+    </div>
+
+    <div class="recommendations-block">
+      <h3>Conventionally Female Hairstyles</h3>
+      <div id="female-hairstyle-list" class="style-card-list">
+        <p class="muted-copy">No recommendations yet.</p>
+      </div>
     </div>
   </aside>
 </section>

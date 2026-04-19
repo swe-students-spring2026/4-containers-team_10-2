@@ -219,17 +219,6 @@ button {
   font-size: 1rem;
 }
 
-.recommendation-list,
-.history-recommendation-list {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.recommendation-list li,
-.history-recommendation-list li {
-  margin-bottom: 8px;
-}
-
 .stats-grid {
   display: grid;
   gap: 18px;
@@ -345,11 +334,116 @@ tbody td {
   display: none;
 }
 
+.preferences-form {
+  display: grid;
+  gap: 10px;
+}
+
+.preferences-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: white;
+}
+
+.small-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.muted-copy {
+  color: var(--muted);
+  margin: 0;
+}
+
+.style-card-list {
+  display: grid;
+  gap: 12px;
+}
+
+.style-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: #fafafa;
+}
+
+.style-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.style-meta {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.style-notes {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+}
+
+.favorite-btn {
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.favorite-btn.favorite-active {
+  background: #111827;
+  color: white;
+  border-color: #111827;
+}
+
+.favorites-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.history-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.history-card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  background: white;
+}
+
+.history-card-header h2 {
+  margin: 0 0 6px;
+}
+
+.history-meta {
+  margin: 0;
+  color: var(--muted);
+}
+
+.history-recommendations-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
 @media (max-width: 900px) {
   .live-layout,
   .dashboard-grid,
   .stats-grid-three,
-  .stats-grid-four {
+  .stats-grid-four,
+  .history-recommendations-grid {
     grid-template-columns: 1fr;
   }
 

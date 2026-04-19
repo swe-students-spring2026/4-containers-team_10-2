@@ -21,14 +21,14 @@ def get_client():
 
 
 def get_collection():
-    """Return the MongoDB collection for face-shape predictions."""
+    """Return the predictions collection."""
     client = get_client()
     db = client[Config.MONGO_DB_NAME]
     return db[Config.MONGO_COLLECTION]
 
 
 def ping_db():
-    """Check that the database connection is alive."""
+    """Ping MongoDB."""
     try:
         client = get_client()
         client.admin.command("ping")
@@ -38,7 +38,7 @@ def ping_db():
 
 
 def insert_prediction(document):
-    """Insert a prediction document into MongoDB."""
+    """Insert a prediction document."""
     try:
         collection = get_collection()
         result = collection.insert_one(document)

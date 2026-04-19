@@ -4,9 +4,9 @@
 
 {% block content %}
 <section class="hero">
-  <h1>Hairstyle Recommendation Dashboard</h1>
+  <h1>Style Dashboard</h1>
   <p class="subtitle">
-    Review your latest scan, face shape history, and recommendation activity.
+    Review your latest scan, saved preferences, and favorite styles.
   </p>
 </section>
 
@@ -19,27 +19,52 @@
   <div class="stat-card">
     <h2>Latest Face Shape</h2>
     <p class="stat-number stat-number-small">
-      {% if latest %}
-        {{ latest.face_shape }}
-      {% else %}
-        --
-      {% endif %}
+      {% if latest %}{{ latest.face_shape }}{% else %}--{% endif %}
     </p>
   </div>
 
   <div class="stat-card">
     <h2>Latest Confidence</h2>
     <p class="stat-number stat-number-small">
-      {% if latest %}
-        {{ "%.2f"|format(latest.confidence) }}
-      {% else %}
-        --
-      {% endif %}
+      {% if latest %}{{ "%.2f"|format(latest.confidence) }}{% else %}--{% endif %}
     </p>
   </div>
 </section>
 
 <section class="dashboard-grid">
+  <div class="panel">
+    <h2>Your Preferences</h2>
+    <form id="dashboard-preferences-form" class="preferences-form">
+      <label for="dashboard-hair-length">Hair Length</label>
+      <select id="dashboard-hair-length" name="hair_length">
+        <option value="any" {% if preferences.hair_length == "any" %}selected{% endif %}>Any</option>
+        <option value="short" {% if preferences.hair_length == "short" %}selected{% endif %}>Short</option>
+        <option value="medium" {% if preferences.hair_length == "medium" %}selected{% endif %}>Medium</option>
+        <option value="long" {% if preferences.hair_length == "long" %}selected{% endif %}>Long</option>
+      </select>
+
+      <label for="dashboard-hair-texture">Hair Texture</label>
+      <select id="dashboard-hair-texture" name="hair_texture">
+        <option value="any" {% if preferences.hair_texture == "any" %}selected{% endif %}>Any</option>
+        <option value="straight" {% if preferences.hair_texture == "straight" %}selected{% endif %}>Straight</option>
+        <option value="wavy" {% if preferences.hair_texture == "wavy" %}selected{% endif %}>Wavy</option>
+        <option value="curly" {% if preferences.hair_texture == "curly" %}selected{% endif %}>Curly</option>
+        <option value="coily" {% if preferences.hair_texture == "coily" %}selected{% endif %}>Coily</option>
+      </select>
+
+      <label for="dashboard-maintenance-level">Maintenance</label>
+      <select id="dashboard-maintenance-level" name="maintenance_level">
+        <option value="any" {% if preferences.maintenance_level == "any" %}selected{% endif %}>Any</option>
+        <option value="low" {% if preferences.maintenance_level == "low" %}selected{% endif %}>Low</option>
+        <option value="medium" {% if preferences.maintenance_level == "medium" %}selected{% endif %}>Medium</option>
+        <option value="high" {% if preferences.maintenance_level == "high" %}selected{% endif %}>High</option>
+      </select>
+
+      <button type="submit" class="button-primary">Update Preferences</button>
+      <p id="dashboard-preferences-status" class="small-status"></p>
+    </form>
+  </div>
+
   <div class="panel">
     <h2>Latest Recommendation</h2>
     {% if latest %}
@@ -50,44 +75,98 @@
         <p><strong>Timestamp:</strong> {{ latest.timestamp }}</p>
 
         <div class="recommendations-block">
-          <h3>Top Hairstyles</h3>
-          <ul class="recommendation-list">
-            {% for style in latest.recommended_hairstyles %}
-              <li>{{ style }}</li>
+          <h3>Conventionally Male Hairstyles</h3>
+          <div class="style-card-list">
+            {% for style in latest.recommended_hairstyles.male %}
+              <div class="style-card">
+                <div class="style-card-top">
+                  <strong>{{ style.name }}</strong>
+                  <button
+                    class="favorite-btn {% if style.favorited %}favorite-active{% endif %}"
+                    data-name="{{ style.name }}"
+                    data-category="male"
+                    data-face-shape="{{ latest.face_shape }}"
+                    data-barber-notes="{{ style.barber_notes }}"
+                    data-favorited="{{ 'true' if style.favorited else 'false' }}"
+                  >
+                    {% if style.favorited %}★ Saved{% else %}☆ Save{% endif %}
+                  </button>
+                </div>
+                <p class="style-meta">
+                  Length: {{ style.lengths|join(", ") }} ·
+                  Texture: {{ style.textures|join(", ") }} ·
+                  Maintenance: {{ style.maintenance }}
+                </p>
+                <p class="style-notes">{{ style.barber_notes }}</p>
+              </div>
             {% endfor %}
-          </ul>
+          </div>
+        </div>
+
+        <div class="recommendations-block">
+          <h3>Conventionally Female Hairstyles</h3>
+          <div class="style-card-list">
+            {% for style in latest.recommended_hairstyles.female %}
+              <div class="style-card">
+                <div class="style-card-top">
+                  <strong>{{ style.name }}</strong>
+                  <button
+                    class="favorite-btn {% if style.favorited %}favorite-active{% endif %}"
+                    data-name="{{ style.name }}"
+                    data-category="female"
+                    data-face-shape="{{ latest.face_shape }}"
+                    data-barber-notes="{{ style.barber_notes }}"
+                    data-favorited="{{ 'true' if style.favorited else 'false' }}"
+                  >
+                    {% if style.favorited %}★ Saved{% else %}☆ Save{% endif %}
+                  </button>
+                </div>
+                <p class="style-meta">
+                  Length: {{ style.lengths|join(", ") }} ·
+                  Texture: {{ style.textures|join(", ") }} ·
+                  Maintenance: {{ style.maintenance }}
+                </p>
+                <p class="style-notes">{{ style.barber_notes }}</p>
+              </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     {% else %}
       <p>No scans available yet.</p>
     {% endif %}
   </div>
+</section>
 
-  <div class="panel">
-    <h2>Face Shape Counts</h2>
-    {% if counts %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Face Shape</th>
-              <th>Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for shape, count in counts.items() %}
-              <tr>
-                <td>{{ shape }}</td>
-                <td>{{ count }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p>No face shape data available yet.</p>
-    {% endif %}
-  </div>
+<section class="panel panel-top-space">
+  <h2>Saved Favorites</h2>
+  {% if favorites %}
+    <div class="favorites-grid">
+      {% for item in favorites %}
+        <div class="style-card">
+          <div class="style-card-top">
+            <strong>{{ item.name }}</strong>
+            <button
+              class="favorite-btn favorite-active"
+              data-name="{{ item.name }}"
+              data-category="{{ item.category }}"
+              data-face-shape="{{ item.face_shape }}"
+              data-barber-notes="{{ item.barber_notes }}"
+              data-favorited="true"
+            >
+              ★ Saved
+            </button>
+          </div>
+          <p class="style-meta">
+            {{ item.category|capitalize }} · {{ item.face_shape }}
+          </p>
+          <p class="style-notes">{{ item.barber_notes }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No favorite styles saved yet.</p>
+  {% endif %}
 </section>
 
 <section class="panel panel-top-space">

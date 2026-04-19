@@ -44,7 +44,7 @@ def analyze():
 
     try:
         image = decode_base64_image(image_b64)
-        result = detect_face_shape(image)
+        result = detect_face_shape(image, session_id=session_id)
 
         document = build_prediction_document(user_id, session_id, result)
         inserted_id = insert_prediction(document)
@@ -58,6 +58,7 @@ def analyze():
                     "face_shape": result["face_shape"],
                     "confidence": result["confidence"],
                     "recommended_hairstyles": result["recommended_hairstyles"],
+                    "face_box": result.get("face_box"),
                 }
             ),
             200,
