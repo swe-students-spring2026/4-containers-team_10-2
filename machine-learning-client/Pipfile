@@ -7,16 +7,16 @@ name = "pypi"
 flask = "*"
 pymongo = "*"
 python-dotenv = "*"
-numpy = "<2"
-opencv-python-headless = "==4.10.0.84"
+numpy = ">=1.26,<2"
+opencv-contrib-python = "==4.10.0.84"
 mediapipe = "==0.10.14"
 pylint = "*"
 black = "*"
 
 [dev-packages]
-pytest = "*"
 pytest-flask = "*"
 coverage = "*"
+pytest = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.11"
