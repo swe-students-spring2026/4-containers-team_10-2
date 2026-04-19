@@ -1,6 +1,6 @@
 ![Lint-free](https://github.com/nyu-software-engineering/containerized-app-exercise/actions/workflows/lint.yml/badge.svg)
-[![Web App CI](https://github.com/swe-students-spring2026/4-containers-team_10-2/.github/workflows/web-app.yml/badge.svg)](https://github.com/swe-students-spring2026/4-containers-team_10-2/.github/workflows/web-app.yml)
-[![ML Client CI](https://github.com/swe-students-spring2026/4-containers-team_10-2/.github/workflows/ml-client.yml/badge.svg)](https://github.com/swe-students-spring2026/4-containers-team_10-2/.github/workflows/ml-client.yml)
+[![Web App CI](https://github.com/swe-students-spring2026/4-containers-team_10-2/actions/workflows/web-app.yml/badge.svg)](https://github.com/swe-students-spring2026/4-containers-team_10-2/actions/workflows/web-app.yml)
+[![ML Client CI](https://github.com/swe-students-spring2026/4-containers-team_10-2/actions/workflows/ml-client.yml/badge.svg)](https://github.com/swe-students-spring2026/4-containers-team_10-2/actions/workflows/ml-client.yml)
 
 # StyleSense
 
